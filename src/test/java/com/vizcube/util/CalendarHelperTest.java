@@ -19,13 +19,17 @@ public class CalendarHelperTest {
 	@Test
 	public void testWeeklyFreequencySettings() {
 		testWeeklyFreequencySettings(Arrays.asList(MONDAY, WEDNESDAY, SATURDAY), "14/01/2019", "14/01/2019", "01/02/2019", null, 2, "14/01/2019", "30/01/2019");
+		testWeeklyFreequencySettings(Arrays.asList(MONDAY, WEDNESDAY, SATURDAY), "14/01/2019", "10/01/2019", "01/02/2019", null, 2, "21/01/2019", "30/01/2019");
+		testWeeklyFreequencySettings(Arrays.asList(MONDAY, WEDNESDAY, SATURDAY), "14/01/2019", "10/01/2019", null, 3, 2, "21/01/2019", "30/01/2019");
+//		testWeeklyFreequencySettings(Arrays.asList(MONDAY, WEDNESDAY, SATURDAY), "14/01/2019", "14/01/2019", "01/02/2019", null, 2, "14/01/2019", "30/01/2019");
+//		testWeeklyFreequencySettings(Arrays.asList(MONDAY, WEDNESDAY, SATURDAY), "14/01/2019", "14/01/2019", "01/02/2019", null, 2, "14/01/2019", "30/01/2019");
 	}
 
 	private void testWeeklyFreequencySettings(List<DayOfWeek> weekdays, String contextDateStr, String startDate, String endDate, Integer occurances, Integer every,
 			String expectedNextDate, String expectedLastDate) {
 
 		/** when */
-		LocalDate actualNextOcuucranceDate = CalendarHelper.getNextOccuranceDate(getDate(contextDateStr), getDate(startDate), getDate(endDate), weekdays, every);
+		LocalDate actualNextOcuucranceDate = CalendarHelper.getNextOccuranceDate(getDate(contextDateStr), getDate(startDate), endDate == null ? null : getDate(endDate), weekdays, every, occurances);
 		// Date actualLastOcuucranceDate =
 		// FrequencySettingsUtil.lastOccuranceDay(getDate(startDate), getDate(endDate),
 		// settingWeekdays, every, occurances);
