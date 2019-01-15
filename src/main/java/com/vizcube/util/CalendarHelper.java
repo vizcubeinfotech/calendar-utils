@@ -132,19 +132,19 @@ public class CalendarHelper {
 			ind = 0;
 		}
 		if (endsByOccurrence) {
+			// end by occurrence logic
 			int occurrenceFactor = occurance / weekdays.size();
 			int occurrenceRemain = occurance % weekdays.size();
 			LocalDate nextDate = actualstartDate.plusWeeks(every * occurrenceFactor);
 			if (occurrenceRemain == 0) {
 				if (ind == 0) {
-					nextDate = nextDate.minusDays(weekdays.get(weekdays.size() - 1).compareTo(nextDate.getDayOfWeek()));
+					nextDate = nextDate.plusDays(weekdays.get(weekdays.size() - 1).compareTo(nextDate.getDayOfWeek())).minusWeeks(every);
 				} else {
 					nextDate = nextDate.minusDays(nextDate.getDayOfWeek().compareTo(weekdays.get(ind - 1)));
 				}
 				return nextDate;
 			}
 			while (occurrenceRemain > 1) {
-				// end by occurrence logic
 				ind++;
 				if (ind >= weekdays.size()) {
 					ind = 0;

@@ -1,9 +1,5 @@
 package com.vizcube.util;
 
-import static java.time.DayOfWeek.MONDAY;
-import static java.time.DayOfWeek.SATURDAY;
-import static java.time.DayOfWeek.WEDNESDAY;
-
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -12,6 +8,8 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import static java.time.DayOfWeek.*;
 
 
 public class CalendarHelperTest {
@@ -23,6 +21,7 @@ public class CalendarHelperTest {
 		testWeeklyFreequencySettings(Arrays.asList(MONDAY, WEDNESDAY, SATURDAY), "14/01/2019", "10/01/2019", null, 3, 2, "21/01/2019", "23/01/2019");
 		testWeeklyFreequencySettings(Arrays.asList(MONDAY, WEDNESDAY, SATURDAY), "22/01/2019", "10/01/2019", null, 4, 2, "23/01/2019", "26/01/2019");
 		testWeeklyFreequencySettings(Arrays.asList(MONDAY, WEDNESDAY, SATURDAY), "10/01/2019", "10/01/2019", null, 5, 2, "12/01/2019", "04/02/2019");
+		testWeeklyFreequencySettings(Arrays.asList(TUESDAY), "11/02/2019", "10/01/2019", null, 5, 3, "19/02/2019", "23/04/2019");
 	}
 
 	private void testWeeklyFreequencySettings(List<DayOfWeek> weekdays, String contextDateStr, String startDate, String endDate, Integer occurances, Integer every,
