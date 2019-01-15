@@ -2,86 +2,201 @@ package com.vizcube.util;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 public class CalendarHelper {
-	
-	/**
-	 * TODO : enum for CalendarWeekdays
-	 * MONDAY("Monday", 1), TUESDAY("Tuesday", 2), WEDNESDAY("Wednesday", 3), THURSDAY("Thursday", 4), FRIDAY("Friday", 5), SATURDAY("Saturday",
-			6), SUNDAY("Sunday", 7)
-		
-		TODO : test cases
-	 * */
 
-	/**
-	 * Method will compute and return the next occurance of weekly repeated event on or just after the contextDate.
-	 * If next occurance event not found in range of startDate & endDate then return null.
-	 * @param contextDate
-	 * @param startDate
-	 * @param endDate
-	 * @param weekdays
-	 * @param every
-	 * @return
-	 */
-	public static LocalDate getNextOccuranceDate(LocalDate contextDate, LocalDate startDate, LocalDate endDate, List<DayOfWeek> weekdays, Integer every) {
-		LocalDate actualstartDate = null;
-		int ind=0;
-		for (DayOfWeek dayOfWeek : weekdays) {
-			if (startDate.getDayOfWeek().compareTo(dayOfWeek) <=0 ) {
-				actualstartDate = startDate.plusDays(dayOfWeek.compareTo(startDate.getDayOfWeek()));
-				break;
-			}
-			ind++;
-		}
-		if (actualstartDate == null) {
-			actualstartDate = startDate.minusDays(startDate.getDayOfWeek().compareTo(weekdays.get(0))).plusWeeks(every);
-			ind=0;
-		}
+    /**
+     * TODO : enum for CalendarWeekdays
+     * MONDAY("Monday", 1), TUESDAY("Tuesday", 2), WEDNESDAY("Wednesday", 3), THURSDAY("Thursday", 4), FRIDAY("Friday", 5), SATURDAY("Saturday",
+     6), SUNDAY("Sunday", 7)
 
-		int skipDayCount = contextDate.compareTo(actualstartDate);
-		if (skipDayCount == 0) {
-			return actualstartDate;
-		} else if (skipDayCount < 0 || endDate.compareTo(contextDate) < 0) {
-			return null;
-		}
-		int skipWeeks = (skipDayCount/(7*every));
-		LocalDate nextDate = actualstartDate.plusWeeks(skipWeeks*every);
-		if (nextDate.compareTo(contextDate) == 0) {
-			return nextDate;
-		}
-//		int difWithFirstOfWeek = nextDate.getDayOfWeek().compareTo(weekdays.get(0));
-//		if (difWithFirstOfWeek < 0) {
-//			nextDate = nextDate.minusDays(difWithFirstOfWeek);
-//		}
-//		int ind=0;
-		while (endDate.compareTo(nextDate) >= 0) {
-			if (nextDate.compareTo(contextDate) >= 0) {
-				return nextDate;
-			}
-			ind++;
-			if (ind >= weekdays.size()) {
-				ind=0;
-				nextDate = nextDate.minusDays(nextDate.getDayOfWeek().compareTo(weekdays.get(0))).plusWeeks(every);
-			} else {
-				nextDate = nextDate.plusDays(nextDate.getDayOfWeek().compareTo(weekdays.get(ind)));
-			}
-		}
-		return null;
-	}
+     TODO : test cases
+     * */
 
-	public static LocalDate getNextOccuranceDate(LocalDate contextDate, LocalDate startDate, List<DayOfWeek> weekdays, Integer every, Integer occurance) {
+    /**
+     * Method will compute and return the next occurance of weekly repeated event on or just after the contextDate.
+     * If next occurance event not found in range of startDate & endDate then return null.
+     * @param contextDate
+     * @param startDate
+     * @param endDate
+     * @param weekdays
+     * @param every
+     * @return
+     */
+    public static LocalDate getNextOccuranceDate(LocalDate contextDate, LocalDate startDate, LocalDate endDate, List<DayOfWeek> weekdays, Integer every, Integer occurance) {
+        if (null == startDate) {
+            throw new IllegalArgumentException("Provide startDate.");
+        }
+        if (null == weekdays || 0 == weekdays.size()) {
+            throw new IllegalArgumentException("Provide days of week.");
+        }
+        if (null == every || 0 == every) {
+            throw new IllegalArgumentException("Provide no of weeks to repeat event.");
+        }
 
-		LocalDate actualstartDate = startDate;
-		int skipDayCount = contextDate.compareTo(actualstartDate);
-		if (skipDayCount < 0) {
-			return null;
-		}
-		//TODO: InProgress
-		return null;
-	}
-	
-//	public static LocalDate getLastOccuranceDate(LocalDate contextDate, LocalDate startDate, LocalDate endDate, List<CalendarWeekdays> weekdays, Integer every, Integer occurance) {
-//		return null;
-//	}
+        boolean withEndDate = false;
+        boolean isNeverEnds = false;
+        boolean endsByOccurrence = false;
+        if (null == endDate) {
+            if (null == occurance) {
+                throw new IllegalArgumentException("Select valid event ending scenario.");
+            }
+            isNeverEnds = occurance == -1;
+            endsByOccurrence = occurance != -1;
+        } else if (null != occurance) {
+            throw new IllegalArgumentException("Select valid event ending scenario.");
+        } else {
+            withEndDate = true;
+        }
+
+        LocalDate actualstartDate = null;
+        int ind=0;
+        for (DayOfWeek dayOfWeek : weekdays) {
+            if (startDate.getDayOfWeek().compareTo(dayOfWeek) <=0 ) {
+                actualstartDate = startDate.plusDays(dayOfWeek.compareTo(startDate.getDayOfWeek()));
+                break;
+            }
+            ind++;
+        }
+        if (actualstartDate == null) {
+            actualstartDate = startDate.minusDays(startDate.getDayOfWeek().compareTo(weekdays.get(0))).plusWeeks(every);
+            ind=0;
+        }
+
+        int skipDayCount = (int)actualstartDate.until(contextDate, ChronoUnit.DAYS);
+        int skipWeeks = (skipDayCount/(7*every));
+        int skipOccurrences = skipWeeks * weekdays.size();
+        int remainingOccurrences=0;
+        if (endsByOccurrence) {
+            remainingOccurrences = occurance - skipOccurrences;
+        }
+        if (skipDayCount == 0) {
+            return actualstartDate;
+        }
+        if (skipDayCount < 0) {
+            return null;
+        }
+        if (withEndDate && contextDate.until(endDate, ChronoUnit.DAYS) < 0) {
+            return null;
+        }
+        if (endsByOccurrence && remainingOccurrences <= 0) {
+            return null;
+        }
+        LocalDate nextDate = actualstartDate.plusWeeks(skipWeeks*every);
+        if (nextDate.until(contextDate, ChronoUnit.DAYS) == 0) {
+            return nextDate;
+        }
+
+        while (isNeverEnds || (withEndDate && nextDate.until(endDate, ChronoUnit.DAYS) >= 0) || (endsByOccurrence && remainingOccurrences>0)) {
+            if (contextDate.until(nextDate, ChronoUnit.DAYS) >= 0) {
+                return nextDate;
+            } else if (endsByOccurrence) {
+                remainingOccurrences--;
+            }
+            ind++;
+            if (ind >= weekdays.size()) {
+                ind=0;
+                nextDate = nextDate.minusDays(nextDate.getDayOfWeek().compareTo(weekdays.get(0))).plusWeeks(every);
+            } else {
+                nextDate = nextDate.plusDays(weekdays.get(ind).compareTo(nextDate.getDayOfWeek()));
+            }
+        }
+        return null;
+    }
+
+    public static LocalDate getLastOccuranceDate(LocalDate startDate, LocalDate endDate, List<DayOfWeek> weekdays, Integer every, Integer occurance) {
+        if (null == startDate) {
+            throw new IllegalArgumentException("Provide startDate.");
+        }
+        if (null == weekdays || 0 == weekdays.size()) {
+            throw new IllegalArgumentException("Provide days of week.");
+        }
+        if (null == every || 0 == every) {
+            throw new IllegalArgumentException("Provide no of weeks to repeat event.");
+        }
+
+        boolean withEndDate = false;
+        boolean isNeverEnds = false;
+        boolean endsByOccurrence = false;
+        if (null == endDate) {
+            if (null == occurance) {
+                throw new IllegalArgumentException("Select valid event ending scenario.");
+            }
+            isNeverEnds = occurance == -1;
+            endsByOccurrence = occurance != -1;
+            if (isNeverEnds) {
+                return null;
+            }
+        } else if (null != occurance) {
+            throw new IllegalArgumentException("Select valid event ending scenario.");
+        } else {
+            withEndDate = true;
+        }
+
+        LocalDate actualstartDate = null;
+        int ind=0;
+        for (DayOfWeek dayOfWeek : weekdays) {
+            if (startDate.getDayOfWeek().compareTo(dayOfWeek) <=0 ) {
+                actualstartDate = startDate.plusDays(dayOfWeek.compareTo(startDate.getDayOfWeek()));
+                break;
+            }
+            ind++;
+        }
+        if (actualstartDate == null) {
+            actualstartDate = startDate.minusDays(startDate.getDayOfWeek().compareTo(weekdays.get(0))).plusWeeks(every);
+            ind=0;
+        }
+        if (endsByOccurrence) {
+            int occurrenceFactor = occurance / weekdays.size();
+            int occurrenceRemain = occurance % weekdays.size();
+            LocalDate nextDate = actualstartDate.plusWeeks(every * occurrenceFactor);
+            if (occurrenceRemain == 0) {
+                if (ind == 0) {
+                    nextDate = nextDate.minusDays(weekdays.get(weekdays.size() - 1).compareTo(nextDate.getDayOfWeek()));
+                } else {
+                    nextDate = nextDate.minusDays(nextDate.getDayOfWeek().compareTo(weekdays.get(ind - 1)));
+                }
+                return nextDate;
+            }
+            while (occurrenceRemain > 1) {
+                //end by occurrence logic
+                ind++;
+                if (ind >= weekdays.size()) {
+                    ind = 0;
+                    nextDate = nextDate.minusDays(nextDate.getDayOfWeek().compareTo(weekdays.get(0))).plusWeeks(every);
+                } else {
+                    nextDate = nextDate.plusDays(nextDate.getDayOfWeek().compareTo(weekdays.get(ind)));
+                }
+                occurrenceRemain--;
+            }
+            return nextDate;
+        } else if (withEndDate) {
+            //WithEndDate logic
+            int skipDayCount = (int)actualstartDate.until(endDate, ChronoUnit.DAYS);
+            int skipWeeks = (skipDayCount/(7*every));
+            if (skipDayCount == 0) {
+                return actualstartDate;
+            }
+            LocalDate nextDate = actualstartDate.plusWeeks(skipWeeks*every);
+            if (endDate.until(nextDate, ChronoUnit.DAYS) == 0) {
+                return nextDate;
+            }
+            LocalDate prevDate = nextDate;
+            while (nextDate.until(endDate, ChronoUnit.DAYS) > 0) {
+                prevDate = nextDate;
+                ind++;
+                if (ind >= weekdays.size()) {
+                    ind=0;
+                    nextDate = nextDate.minusDays(nextDate.getDayOfWeek().compareTo(weekdays.get(0))).plusWeeks(every);
+                } else {
+                    nextDate = nextDate.plusDays(weekdays.get(ind).compareTo(nextDate.getDayOfWeek()));
+                }
+            }
+            return prevDate;
+        }
+
+        return null;
+    }
 }
