@@ -146,7 +146,7 @@ public class CalendarHelper {
 					ind = 0;
 					nextDate = nextDate.minusDays(nextDate.getDayOfWeek().compareTo(weekdays.get(0))).plusWeeks(every);
 				} else {
-					nextDate = nextDate.plusDays(nextDate.getDayOfWeek().compareTo(weekdays.get(ind)));
+					nextDate = nextDate.plusDays(weekdays.get(ind).compareTo(nextDate.getDayOfWeek()));
 				}
 				occurrenceRemain--;
 			}
