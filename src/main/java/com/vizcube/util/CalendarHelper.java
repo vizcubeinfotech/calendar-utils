@@ -8,16 +8,21 @@ import java.util.List;
 public class CalendarHelper {
 
 	/**
-	 * Method will compute and return the next occurance of weekly repeated event on
-	 * or just after the contextDate. If next occurance event not found in range of
-	 * startDate & endDate then return null.
+	 * Method will compute and return the next occurrence of weekly repeated event
+	 * on or just after the contextDate. If next occurrence event not found in range
+	 * of startDate and endDate then return null.
 	 * 
 	 * @param contextDate
+	 *            the date for which next date needs to lookup
 	 * @param startDate
+	 *            the start date
 	 * @param endDate
+	 *            the end date (may be null)
 	 * @param weekdays
+	 *            the week days selected to repeat
 	 * @param every
-	 * @return
+	 *            after weeks for repeat
+	 * @return the next occurrence date
 	 */
 	public static LocalDate getWeeklyNextOccuranceDate(LocalDate contextDate, LocalDate startDate, LocalDate endDate, List<DayOfWeek> weekdays, Integer every,
 			Integer occurance) {
@@ -97,6 +102,20 @@ public class CalendarHelper {
 		return null;
 	}
 
+	/**
+	 * This Method will compute and return the last occurrence of weekly repeated
+	 * event for given settings
+	 *
+	 * @param startDate
+	 *            the start date
+	 * @param endDate
+	 *            the end date (may be null)
+	 * @param weekdays
+	 *            the week days selected to repeat
+	 * @param every
+	 *            after weeks for repeat
+	 * @return the last occurrence date
+	 */
 	public static LocalDate getWeeklyLastOccuranceDate(LocalDate startDate, LocalDate endDate, List<DayOfWeek> weekdays, Integer every, Integer occurance) {
 		validateInput(startDate, weekdays, every);
 
@@ -155,9 +174,9 @@ public class CalendarHelper {
 				occurrenceRemain--;
 			}
 			return nextDate;
-			
+
 		} else if (withEndDate) {
-			
+
 			// WithEndDate logic
 			int skipDayCount = (int) actualstartDate.until(endDate, ChronoUnit.DAYS);
 			int skipWeeks = (skipDayCount / (7 * every));
