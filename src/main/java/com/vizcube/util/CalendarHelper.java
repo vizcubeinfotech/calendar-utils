@@ -52,6 +52,10 @@ public class CalendarHelper {
 			ind = 0;
 		}
 
+		if (startDate.until(contextDate, ChronoUnit.DAYS) == 0) {
+			return actualstartDate;
+		}
+
 		int skipDayCount = (int) actualstartDate.until(contextDate, ChronoUnit.DAYS);
 		int skipWeeks = (skipDayCount / (7 * every.intValue()));
 		int skipOccurrences = skipWeeks * weekdays.size();
