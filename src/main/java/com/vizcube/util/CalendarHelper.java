@@ -19,7 +19,7 @@ public class CalendarHelper {
 	 * @param every
 	 * @return
 	 */
-	public static LocalDate getNextOccuranceDate(LocalDate contextDate, LocalDate startDate, LocalDate endDate, List<DayOfWeek> weekdays, Integer every,
+	public static LocalDate getWeeklyNextOccuranceDate(LocalDate contextDate, LocalDate startDate, LocalDate endDate, List<DayOfWeek> weekdays, Integer every,
 			Integer occurance) {
 		validateInput(startDate, weekdays, every);
 
@@ -97,7 +97,7 @@ public class CalendarHelper {
 		return null;
 	}
 
-	public static LocalDate getLastOccuranceDate(LocalDate startDate, LocalDate endDate, List<DayOfWeek> weekdays, Integer every, Integer occurance) {
+	public static LocalDate getWeeklyLastOccuranceDate(LocalDate startDate, LocalDate endDate, List<DayOfWeek> weekdays, Integer every, Integer occurance) {
 		validateInput(startDate, weekdays, every);
 
 		boolean withEndDate = false;
