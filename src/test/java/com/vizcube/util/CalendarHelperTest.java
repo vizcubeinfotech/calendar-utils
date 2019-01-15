@@ -29,8 +29,8 @@ public class CalendarHelperTest {
 			String expectedNextDate, String expectedLastDate) {
 
 		/** when */
-		LocalDate actualNextOcuucranceDate = CalendarHelper.getNextOccuranceDate(getDate(contextDateStr), getDate(startDate), endDate == null ? null : getDate(endDate), weekdays, every, occurances);
-		LocalDate actualLastOcuucranceDate = CalendarHelper.getLastOccuranceDate(getDate(startDate), endDate == null ? null : getDate(endDate), weekdays, every, occurances);
+		LocalDate actualNextOcuucranceDate = CalendarHelper.getWeeklyNextOccuranceDate(getDate(contextDateStr), getDate(startDate), endDate == null ? null : getDate(endDate), weekdays, every, occurances);
+		LocalDate actualLastOcuucranceDate = CalendarHelper.getWeeklyLastOccuranceDate(getDate(startDate), endDate == null ? null : getDate(endDate), weekdays, every, occurances);
 
 		/** then */
 		assertDate(expectedNextDate, actualNextOcuucranceDate);
