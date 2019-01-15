@@ -3,7 +3,7 @@
 	<groupId>com.vizcube.util</groupId>
 	<artifactId>calendar-utils</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0.1</version>
+	<version>1.0.2-SNAPSHOT</version>
 	<name>calendar-utils</name>
 	<url>http://maven.apache.org</url>
 
@@ -15,7 +15,7 @@
 		<connection>scm:git:https://github.com/vizcubeinfotech/calendar-utils.git</connection>
 		<developerConnection>scm:git:https://github.com/vizcubeinfotech/calendar-utils.git</developerConnection>
 		<url>https://github.com/vizcubeinfotech/calendar-utils</url>
-		<tag>v1.0.1</tag>
+		<tag>v1.0.0</tag>
 	</scm>
 
 	<dependencies>
