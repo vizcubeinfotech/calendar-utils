@@ -222,7 +222,7 @@ public class CalendarHelper {
 	 *            number of occurrence of event if endDate is not set
 	 * @return the next occurrence date
 	 */
-	public static LocalDate getDailyNextOccurranceDate(LocalDate contextDate, LocalDate startDate, LocalDate endDate, Integer every, Integer occurance) {
+	public static LocalDate getDailyNextOccurrenceDate(LocalDate contextDate, LocalDate startDate, LocalDate endDate, Integer every, Integer occurance) {
 		validateInput(startDate, every);
 
 		boolean withEndDate = false;
@@ -286,7 +286,7 @@ public class CalendarHelper {
 	 *            number of occurrence of event if endDate is not set
 	 * @return the last occurrence date
 	 */
-	public static LocalDate getDailyLastOccuranceDate(LocalDate startDate, LocalDate endDate, Integer every, Integer occurance) {
+	public static LocalDate getDailyLastOccurrenceDate(LocalDate startDate, LocalDate endDate, Integer every, Integer occurance) {
 		validateInput(startDate, every);
 
 		boolean withEndDate = false;
@@ -351,7 +351,7 @@ public class CalendarHelper {
 	 *            number of occurrence of event if endDate is not set
 	 * @return the next occurrence date
 	 */
-	public static LocalDate getYearlyNextOccuranceDate(LocalDate contextDate, LocalDate startDate, LocalDate endDate, Integer every, Integer occurance) {
+	public static LocalDate getYearlyNextOccurrenceDate(LocalDate contextDate, LocalDate startDate, LocalDate endDate, Integer every, Integer occurance) {
 		validateInput(startDate, every);
 
 		boolean withEndDate = false;
@@ -433,7 +433,7 @@ public class CalendarHelper {
 	 *            number of occurrence of event if endDate is not set
 	 * @return the last occurrence date
 	 */
-	public static LocalDate getYearlyLastOccuranceDate(LocalDate startDate, LocalDate endDate, Integer every, Integer occurance) {
+	public static LocalDate getYearlyLastOccurrenceDate(LocalDate startDate, LocalDate endDate, Integer every, Integer occurance) {
 		validateInput(startDate, every);
 
 		boolean withEndDate = false;

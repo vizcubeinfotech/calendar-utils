@@ -51,8 +51,8 @@ public class CalendarHelperTest {
 											  String expectedNextDate, String expectedLastDate) {
 
 		/** when */
-		LocalDate actualNextOcuucranceDate = CalendarHelper.getDailyNextOccurranceDate(getDate(contextDateStr), getDate(startDate), endDate == null ? null : getDate(endDate), every, occurances);
-		LocalDate actualLastOcuucranceDate = CalendarHelper.getDailyLastOccuranceDate(getDate(startDate), endDate == null ? null : getDate(endDate), every, occurances);
+		LocalDate actualNextOcuucranceDate = CalendarHelper.getDailyNextOccurrenceDate(getDate(contextDateStr), getDate(startDate), endDate == null ? null : getDate(endDate), every, occurances);
+		LocalDate actualLastOcuucranceDate = CalendarHelper.getDailyLastOccurrenceDate(getDate(startDate), endDate == null ? null : getDate(endDate), every, occurances);
 
 		/** then */
 		assertDate(expectedNextDate, actualNextOcuucranceDate);
@@ -71,8 +71,8 @@ public class CalendarHelperTest {
 											 String expectedNextDate, String expectedLastDate) {
 
 		/** when */
-		LocalDate actualNextOcuucranceDate = CalendarHelper.getYearlyNextOccuranceDate(getDate(contextDateStr), getDate(startDate), endDate == null ? null : getDate(endDate), every, occurances);
-		LocalDate actualLastOcuucranceDate = CalendarHelper.getYearlyLastOccuranceDate(getDate(startDate), endDate == null ? null : getDate(endDate), every, occurances);
+		LocalDate actualNextOcuucranceDate = CalendarHelper.getYearlyNextOccurrenceDate(getDate(contextDateStr), getDate(startDate), endDate == null ? null : getDate(endDate), every, occurances);
+		LocalDate actualLastOcuucranceDate = CalendarHelper.getYearlyLastOccurrenceDate(getDate(startDate), endDate == null ? null : getDate(endDate), every, occurances);
 
 		/** then */
 		assertDate(expectedNextDate, actualNextOcuucranceDate);
