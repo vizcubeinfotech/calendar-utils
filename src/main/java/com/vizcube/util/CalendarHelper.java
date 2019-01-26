@@ -24,6 +24,8 @@ public class CalendarHelper {
 	 *            the week days selected to repeat
 	 * @param every
 	 *            after weeks for repeat
+	 * @param occurance
+	 *            number of occurrence of event if endDate is not set
 	 * @return the next occurrence date
 	 */
 	public static LocalDate getWeeklyNextOccuranceDate(LocalDate contextDate, LocalDate startDate, LocalDate endDate, List<DayOfWeek> weekdays, Integer every,
@@ -203,6 +205,23 @@ public class CalendarHelper {
 		return null;
 	}
 
+	/**
+	 * Method will compute and return the next occurrence of daily repeated event
+	 * on or just after the contextDate. If next occurrence event not found in range
+	 * of startDate and endDate then return null.
+	 *
+	 * @param contextDate
+	 *            the date for which next date needs to lookup
+	 * @param startDate
+	 *            the start date
+	 * @param endDate
+	 *            the end date (may be null)
+	 * @param every
+	 *            after days for repeat
+	 * @param occurance
+	 *            number of occurrence of event if endDate is not set
+	 * @return the next occurrence date
+	 */
 	public static LocalDate getDailyNextOccurranceDate(LocalDate contextDate, LocalDate startDate, LocalDate endDate, Integer every, Integer occurance) {
 		validateInput(startDate, every);
 
@@ -253,6 +272,20 @@ public class CalendarHelper {
 		return null;
 	}
 
+	/**
+	 * This Method will compute and return the last occurrence of daily repeated
+	 * event for given settings
+	 *
+	 * @param startDate
+	 *            the start date
+	 * @param endDate
+	 *            the end date (may be null)
+	 * @param every
+	 *            after days for repeat
+	 * @param occurance
+	 *            number of occurrence of event if endDate is not set
+	 * @return the last occurrence date
+	 */
 	public static LocalDate getDailyLastOccuranceDate(LocalDate startDate, LocalDate endDate, Integer every, Integer occurance) {
 		validateInput(startDate, every);
 
@@ -301,6 +334,23 @@ public class CalendarHelper {
 		return null;
 	}
 
+	/**
+	 * Method will compute and return the next occurrence of yearly repeated event
+	 * on or just after the contextDate. If next occurrence event not found in range
+	 * of startDate and endDate then return null.
+	 *
+	 * @param contextDate
+	 *            the date for which next date needs to lookup
+	 * @param startDate
+	 *            the start date
+	 * @param endDate
+	 *            the end date (may be null)
+	 * @param every
+	 *            after years for repeat
+	 * @param occurance
+	 *            number of occurrence of event if endDate is not set
+	 * @return the next occurrence date
+	 */
 	public static LocalDate getYearlyNextOccuranceDate(LocalDate contextDate, LocalDate startDate, LocalDate endDate, Integer every, Integer occurance) {
 		validateInput(startDate, every);
 
@@ -369,6 +419,20 @@ public class CalendarHelper {
 		return null;
 	}
 
+	/**
+	 * This Method will compute and return the last occurrence of daily repeated
+	 * event for given settings
+	 *
+	 * @param startDate
+	 *            the start date
+	 * @param endDate
+	 *            the end date (may be null)
+	 * @param every
+	 *            after years for repeat
+	 * @param occurance
+	 *            number of occurrence of event if endDate is not set
+	 * @return the last occurrence date
+	 */
 	public static LocalDate getYearlyLastOccuranceDate(LocalDate startDate, LocalDate endDate, Integer every, Integer occurance) {
 		validateInput(startDate, every);
 
