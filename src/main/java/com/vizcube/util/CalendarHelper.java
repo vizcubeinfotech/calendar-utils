@@ -2,6 +2,8 @@ package com.vizcube.util;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.Year;
+import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -68,17 +70,14 @@ public class CalendarHelper {
 		if (endsByOccurrence) {
 			remainingOccurrences = occurance - skipOccurrences;
 		}
-		if (skipDayCount == 0) {
-			return actualstartDate;
-		}
-		if (skipDayCount < 0) {
-			return null;
-		}
 		if (withEndDate && contextDate.until(endDate, ChronoUnit.DAYS) < 0) {
 			return null;
 		}
 		if (endsByOccurrence && remainingOccurrences <= 0) {
 			return null;
+		}
+		if (skipDayCount <= 0) {
+			return actualstartDate;
 		}
 		LocalDate nextDate = actualstartDate.plusWeeks(skipWeeks * every.intValue());
 		if (nextDate.until(contextDate, ChronoUnit.DAYS) == 0) {
@@ -204,12 +203,237 @@ public class CalendarHelper {
 		return null;
 	}
 
-	private static void validateInput(LocalDate startDate, List<DayOfWeek> weekdays, Integer every) {
-		if (null == startDate) {
-			throw new IllegalArgumentException("Provide startDate.");
+	public static LocalDate getDailyNextOccurranceDate(LocalDate contextDate, LocalDate startDate, LocalDate endDate, Integer every, Integer occurance) {
+		validateInput(startDate, every);
+
+		boolean withEndDate = false;
+		boolean isNeverEnds = false;
+		boolean endsByOccurrence = false;
+		if (null == endDate) {
+			if (null == occurance) {
+				throw new IllegalArgumentException("Select valid event ending scenario.");
+			}
+			isNeverEnds = occurance == -1;
+			endsByOccurrence = occurance != -1;
+		} else if (null != occurance) {
+			throw new IllegalArgumentException("Select valid event ending scenario.");
+		} else {
+			withEndDate = true;
 		}
+
+
+		int skipDayCount = (int)startDate.until(contextDate, ChronoUnit.DAYS);
+		int skipDaysOccurrences = (skipDayCount/every);
+		int remainingOccurrences=0;
+		if (endsByOccurrence) {
+			remainingOccurrences = occurance - skipDaysOccurrences;
+		}
+		if (withEndDate && contextDate.until(endDate, ChronoUnit.DAYS) < 0) {
+			return null;
+		}
+		if (endsByOccurrence && remainingOccurrences <= 0) {
+			return null;
+		}
+		if (skipDayCount <= 0) {
+			return startDate;
+		}
+		LocalDate nextDate = startDate.plusDays(every);
+		if (nextDate.until(contextDate, ChronoUnit.DAYS) == 0) {
+			return nextDate;
+		}
+
+		while (isNeverEnds || (withEndDate && nextDate.until(endDate, ChronoUnit.DAYS) >= 0) || (endsByOccurrence && remainingOccurrences>0)) {
+			if (contextDate.until(nextDate, ChronoUnit.DAYS) >= 0) {
+				return nextDate;
+			} else if (endsByOccurrence) {
+				remainingOccurrences--;
+			}
+			nextDate = nextDate.plusDays(every);
+		}
+		return null;
+	}
+
+	public static LocalDate getDailyLastOccuranceDate(LocalDate startDate, LocalDate endDate, Integer every, Integer occurance) {
+		validateInput(startDate, every);
+
+		boolean withEndDate = false;
+		boolean isNeverEnds = false;
+		boolean endsByOccurrence = false;
+		if (null == endDate) {
+			if (null == occurance) {
+				throw new IllegalArgumentException("Select valid event ending scenario.");
+			}
+			isNeverEnds = occurance == -1;
+			endsByOccurrence = occurance != -1;
+			if (isNeverEnds) {
+				return null;
+			}
+		} else if (null != occurance) {
+			throw new IllegalArgumentException("Select valid event ending scenario.");
+		} else {
+			withEndDate = true;
+		}
+
+
+		if (endsByOccurrence) {
+			LocalDate nextDate = startDate.plusDays(every * (occurance-1));
+
+			return nextDate;
+		} else if (withEndDate) {
+			//WithEndDate logic
+			int skipDayCount = (int)startDate.until(endDate, ChronoUnit.DAYS);
+			int skipDayFactor = (skipDayCount/every);
+			if (skipDayCount == 0) {
+				return startDate;
+			}
+			LocalDate nextDate = startDate.plusDays(skipDayFactor*every);
+			if (endDate.until(nextDate, ChronoUnit.DAYS) == 0) {
+				return nextDate;
+			}
+			LocalDate prevDate = startDate;
+			while (nextDate.until(endDate, ChronoUnit.DAYS) > 0) {
+				prevDate = nextDate;
+				nextDate = nextDate.plusDays(every);
+			}
+			return prevDate;
+		}
+
+		return null;
+	}
+
+	public static LocalDate getYearlyNextOccuranceDate(LocalDate contextDate, LocalDate startDate, LocalDate endDate, Integer every, Integer occurance) {
+		validateInput(startDate, every);
+
+		boolean withEndDate = false;
+		boolean isNeverEnds = false;
+		boolean endsByOccurrence = false;
+		boolean isLeapDayOfFeb = startDate.get(ChronoField.MONTH_OF_YEAR) == 2 && startDate.get(ChronoField.DAY_OF_MONTH) == 29;
+		if (null == endDate) {
+			if (null == occurance) {
+				throw new IllegalArgumentException("Select valid event ending scenario.");
+			}
+			isNeverEnds = occurance == -1;
+			endsByOccurrence = occurance != -1;
+		} else if (null != occurance) {
+			throw new IllegalArgumentException("Select valid event ending scenario.");
+		} else {
+			withEndDate = true;
+		}
+
+		if (isLeapDayOfFeb) {
+			int nextYear = startDate.getYear();
+			LocalDate nextDate = startDate;
+
+			while((endsByOccurrence && occurance > 0) || (withEndDate && nextDate.until(endDate, ChronoUnit.DAYS) >= 0)) {
+				if (contextDate.isBefore(nextDate) || contextDate.isEqual(nextDate)) {
+					return nextDate;
+				} else if (endsByOccurrence) {
+					occurance--;
+				}
+				do {
+					nextYear += every;
+				} while (!Year.isLeap(nextYear));
+				nextDate = nextDate.withYear(nextYear);
+			}
+			return null;
+		} else {
+			int skipDayCount = (int) startDate.until(contextDate, ChronoUnit.YEARS);
+			int skipDaysOccurrences = (skipDayCount / every);
+			int remainingOccurrences = 0;
+			if (endsByOccurrence) {
+				remainingOccurrences = occurance - skipDaysOccurrences;
+			}
+			if (withEndDate && contextDate.until(endDate, ChronoUnit.DAYS) < 0) {
+				return null;
+			}
+			if (endsByOccurrence && remainingOccurrences <= 0) {
+				return null;
+			}
+			if (startDate.until(contextDate, ChronoUnit.DAYS) <= 0) {
+				return startDate;
+			}
+			LocalDate nextDate = startDate.plusYears(every);
+			if (nextDate.until(contextDate, ChronoUnit.DAYS) <= 0) {
+				return nextDate;
+			}
+
+			while (isNeverEnds || (withEndDate && nextDate.until(endDate, ChronoUnit.DAYS) >= 0) || (endsByOccurrence && remainingOccurrences > 0)) {
+				if (contextDate.until(nextDate, ChronoUnit.DAYS) >= 0) {
+					return nextDate;
+				} else if (endsByOccurrence) {
+					remainingOccurrences--;
+				}
+				nextDate = nextDate.plusYears(every);
+			}
+		}
+		return null;
+	}
+
+	public static LocalDate getYearlyLastOccuranceDate(LocalDate startDate, LocalDate endDate, Integer every, Integer occurance) {
+		validateInput(startDate, every);
+
+		boolean withEndDate = false;
+		boolean isNeverEnds = false;
+		boolean endsByOccurrence = false;
+		boolean isLeapDayOfFeb = startDate.get(ChronoField.MONTH_OF_YEAR) == 2 && startDate.get(ChronoField.DAY_OF_MONTH) == 29;
+		if (null == endDate) {
+			if (null == occurance) {
+				throw new IllegalArgumentException("Select valid event ending scenario.");
+			}
+			isNeverEnds = occurance == -1;
+			endsByOccurrence = occurance != -1;
+			if (isNeverEnds) {
+				return null;
+			}
+		} else if (null != occurance) {
+			throw new IllegalArgumentException("Select valid event ending scenario.");
+		} else {
+			withEndDate = true;
+		}
+
+		int lcm = every > 4 ? every : 4;
+		int add = lcm;
+		int n = every > 4 ? 4 : every;
+		while (lcm % n != 0) {
+			lcm+=add;
+		}
+		if (endsByOccurrence) {
+			LocalDate nextDate = null;
+			nextDate = startDate.plusYears((occurance-1) * (isLeapDayOfFeb ? lcm : every));
+
+			return nextDate;
+		} else if (withEndDate) {
+			//WithEndDate logic
+			int skipYearCount = (int)startDate.until(endDate, ChronoUnit.YEARS);
+			int skipYearFactor = (skipYearCount/(isLeapDayOfFeb ? lcm : every));
+			if (startDate.until(endDate, ChronoUnit.DAYS) == 0) {
+				return startDate;
+			}
+			LocalDate nextDate = startDate.plusYears(skipYearFactor*(isLeapDayOfFeb ? lcm : every));
+			if (endDate.until(nextDate, ChronoUnit.DAYS) == 0) {
+				return nextDate;
+			}
+			LocalDate prevDate = startDate;
+			while (nextDate.until(endDate, ChronoUnit.DAYS) > 0) {
+				prevDate = nextDate;
+				nextDate = nextDate.plusYears(isLeapDayOfFeb ? lcm : every);
+			}
+			return prevDate;
+		}
+
+		return null;
+	}
+
+	private static void validateInput(LocalDate startDate, List<DayOfWeek> weekdays, Integer every) {
+		validateInput(startDate, every);
 		if (null == weekdays || 0 == weekdays.size()) {
 			throw new IllegalArgumentException("Provide days of week.");
+		}
+	}
+
+	private static void validateInput(LocalDate startDate, Integer every) {
+		if (null == startDate) {
+			throw new IllegalArgumentException("Provide startDate.");
 		}
 		if (null == every || 0 == every.intValue()) {
 			throw new IllegalArgumentException("Provide no of weeks to repeat event.");
