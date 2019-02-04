@@ -548,7 +548,10 @@ public class CalendarHelper {
 
 		int skipMonth = (int)actualStartDate.until(contextDate, ChronoUnit.MONTHS);
 		int skipMonthFactor = skipMonth / every;
-		int remaningOccurrence = occurance - every * skipMonthFactor;
+        int remaningOccurrence = 0;
+        if (endsByOccurrence) {
+            remaningOccurrence = occurance - every * skipMonthFactor;
+        }
 		LocalDate nextLocalDate = actualStartDate.withDayOfMonth(1).plusMonths(every*skipMonthFactor);
 		nextLocalDate = repeatMonthDate ? getNextDateOfNextEventMonth(nextLocalDate.minusMonths(every), every, monthDate) : nextLocalDate.with(TemporalAdjusters.dayOfWeekInMonth(dayOfWeekInMonth, dayOfWeek));
 		while(isNeverEnds || (endsByOccurrence && occurance>0) || (withEndDate && (nextLocalDate.isBefore(endDate) || nextLocalDate.isEqual(endDate)))) {
