@@ -509,16 +509,23 @@ public class CalendarHelper {
 
 		boolean repeatMonthDate = false;
 		boolean repeatDayOfWeekInMonth = false;
+
+		boolean isLastDayOfWeek = false;
+
 		if (monthDate != null) {
 			if (dayOfWeekInMonth != null) {
-				throw new IllegalArgumentException("");
+				throw new IllegalArgumentException("Select any one of week day or date in month.");
 			} else {
 				repeatMonthDate = true;
 			}
 		} else if(dayOfWeekInMonth != null) {
+			if (dayOfWeekInMonth < 1 || dayOfWeekInMonth > 5) {
+				throw new IllegalArgumentException("Select valid day of week in month between 1 to 5.");
+			}
 			repeatDayOfWeekInMonth = true;
+			isLastDayOfWeek = dayOfWeekInMonth == 5;
 		} else {
-			throw new IllegalArgumentException("");
+			throw new IllegalArgumentException("Select valid week day or date in month.");
 		}
 
 		LocalDate actualStartDate = null;
@@ -536,9 +543,9 @@ public class CalendarHelper {
 				}
 			}
 		} else if (repeatDayOfWeekInMonth) {//last week day logic remain
-			actualStartDate = startDate.with(TemporalAdjusters.dayOfWeekInMonth(dayOfWeekInMonth, dayOfWeek));
+			actualStartDate = startDate.with( isLastDayOfWeek ? TemporalAdjusters.lastInMonth(dayOfWeek) : TemporalAdjusters.dayOfWeekInMonth(dayOfWeekInMonth, dayOfWeek));
 			if (actualStartDate.isBefore(startDate)) {
-				actualStartDate = actualStartDate.withDayOfMonth(1).plusMonths(every).with(TemporalAdjusters.dayOfWeekInMonth(dayOfWeekInMonth, dayOfWeek));
+				actualStartDate = actualStartDate.withDayOfMonth(1).plusMonths(every).with(isLastDayOfWeek ? TemporalAdjusters.lastInMonth(dayOfWeek) : TemporalAdjusters.dayOfWeekInMonth(dayOfWeekInMonth, dayOfWeek));
 			}
 		}
 
@@ -553,14 +560,14 @@ public class CalendarHelper {
             remaningOccurrence = occurance - every * skipMonthFactor;
         }
 		LocalDate nextLocalDate = actualStartDate.withDayOfMonth(1).plusMonths(every*skipMonthFactor);
-		nextLocalDate = repeatMonthDate ? getNextDateOfNextEventMonth(nextLocalDate.minusMonths(every), every, monthDate) : nextLocalDate.with(TemporalAdjusters.dayOfWeekInMonth(dayOfWeekInMonth, dayOfWeek));
+		nextLocalDate = repeatMonthDate ? getNextDateOfNextEventMonth(nextLocalDate.minusMonths(every), every, monthDate) : nextLocalDate.with(isLastDayOfWeek ? TemporalAdjusters.lastInMonth(dayOfWeek) : TemporalAdjusters.dayOfWeekInMonth(dayOfWeekInMonth, dayOfWeek));
 		while(isNeverEnds || (endsByOccurrence && occurance>0) || (withEndDate && (nextLocalDate.isBefore(endDate) || nextLocalDate.isEqual(endDate)))) {
 			if (contextDate.isBefore(nextLocalDate) || contextDate.isEqual(nextLocalDate)) {
 				return nextLocalDate;
 			} else if (endsByOccurrence) {
 				occurance--;
 			}
-			nextLocalDate = repeatMonthDate ? getNextDateOfNextEventMonth(nextLocalDate, every, monthDate): nextLocalDate.withDayOfMonth(1).plusMonths(every).with(TemporalAdjusters.dayOfWeekInMonth(dayOfWeekInMonth,dayOfWeek));
+			nextLocalDate = repeatMonthDate ? getNextDateOfNextEventMonth(nextLocalDate, every, monthDate): nextLocalDate.withDayOfMonth(1).plusMonths(every).with(isLastDayOfWeek ? TemporalAdjusters.lastInMonth(dayOfWeek) : TemporalAdjusters.dayOfWeekInMonth(dayOfWeekInMonth,dayOfWeek));
 		}
 		return null;
 	}
@@ -586,16 +593,22 @@ public class CalendarHelper {
 
 		boolean repeatMonthDate = false;
 		boolean repeatDayOfWeekInMonth = false;
+		boolean isLastDayOfWeek = false;
 		if (monthDate != null) {
 			if (dayOfWeekInMonth != null) {
-				throw new IllegalArgumentException("");
+				throw new IllegalArgumentException("Select any one of week day or date in month.");
 			} else {
 				repeatMonthDate = true;
 			}
 		} else if(dayOfWeekInMonth != null) {
+			if (dayOfWeekInMonth < 1 || dayOfWeekInMonth > 5) {
+				throw new IllegalArgumentException("Select valid day of week in month between 1 to 5.");
+			}
+
+			isLastDayOfWeek = dayOfWeekInMonth == 5;
 			repeatDayOfWeekInMonth = true;
 		} else {
-			throw new IllegalArgumentException("");
+			throw new IllegalArgumentException("Select valid week day or date in month.");
 		}
 
 		LocalDate actualStartDate = null;
@@ -613,9 +626,9 @@ public class CalendarHelper {
 				}
 			}
 		} else if (repeatDayOfWeekInMonth) {//last week day logic remain
-			actualStartDate = startDate.with(TemporalAdjusters.dayOfWeekInMonth(dayOfWeekInMonth, dayOfWeek));
+			actualStartDate = startDate.with(isLastDayOfWeek ? TemporalAdjusters.lastInMonth(dayOfWeek) : TemporalAdjusters.dayOfWeekInMonth(dayOfWeekInMonth, dayOfWeek));
 			if (actualStartDate.isBefore(startDate)) {
-				actualStartDate = actualStartDate.withDayOfMonth(1).plusMonths(every).with(TemporalAdjusters.dayOfWeekInMonth(dayOfWeekInMonth, dayOfWeek));
+				actualStartDate = actualStartDate.withDayOfMonth(1).plusMonths(every).with(isLastDayOfWeek ? TemporalAdjusters.lastInMonth(dayOfWeek) : TemporalAdjusters.dayOfWeekInMonth(dayOfWeekInMonth, dayOfWeek));
 			}
 		}
 
@@ -626,9 +639,9 @@ public class CalendarHelper {
 			nextDate = actualStartDate.plusMonths(skipMonthFactor * every);
 
 			if (repeatDayOfWeekInMonth) {
-				nextDate = nextDate.withDayOfMonth(1).with(TemporalAdjusters.dayOfWeekInMonth(dayOfWeekInMonth, dayOfWeek));
+				nextDate = nextDate.withDayOfMonth(1).with(isLastDayOfWeek ? TemporalAdjusters.lastInMonth(dayOfWeek) : TemporalAdjusters.dayOfWeekInMonth(dayOfWeekInMonth, dayOfWeek));
 				if (nextDate.until(endDate, ChronoUnit.DAYS) < 0) {
-					return nextDate.minusMonths(every).withDayOfMonth(1).with(TemporalAdjusters.dayOfWeekInMonth(dayOfWeekInMonth, dayOfWeek));
+					return nextDate.minusMonths(every).withDayOfMonth(1).with(isLastDayOfWeek ? TemporalAdjusters.lastInMonth(dayOfWeek) : TemporalAdjusters.dayOfWeekInMonth(dayOfWeekInMonth, dayOfWeek));
 				} else
 					return nextDate;
 			} else if (repeatMonthDate) {
@@ -652,7 +665,7 @@ public class CalendarHelper {
 
 		} else if (endsByOccurrence) {
 			if (repeatDayOfWeekInMonth) {
-				nextDate = actualStartDate.withDayOfMonth(1).plusMonths((occurance - 1) * every).with(TemporalAdjusters.dayOfWeekInMonth(dayOfWeekInMonth, dayOfWeek));
+				nextDate = actualStartDate.withDayOfMonth(1).plusMonths((occurance - 1) * every).with(isLastDayOfWeek ? TemporalAdjusters.lastInMonth(dayOfWeek) : TemporalAdjusters.dayOfWeekInMonth(dayOfWeekInMonth, dayOfWeek));
 			} else if (repeatMonthDate) {
 				nextDate = actualStartDate;
 				occurance--;
