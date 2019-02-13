@@ -85,6 +85,10 @@ public class CalendarHelperTest {
 		testMonthlyFreequencySettings("05/01/2019", "05/01/2019", "22/09/2019", null, 2, 21, null, null,"21/01/2019", "21/09/2019");
 		testMonthlyFreequencySettings("05/04/2019", "05/01/2019", "05/10/2019", null, 1, 31, null, null,"31/05/2019", "31/08/2019");
 		testMonthlyFreequencySettings("05/03/2019", "05/01/2019", null, 9, 2, 3, null, null,"03/05/2019", "03/07/2020");
+		testMonthlyFreequencySettings("05/03/2019", "05/01/2019", null, 9, 2, null, 3, DayOfWeek.THURSDAY,"21/03/2019", "21/05/2020");
+		testMonthlyFreequencySettings("05/03/2019", "05/01/2019", null, 9, 2, null, 5, DayOfWeek.THURSDAY,"28/03/2019", "28/05/2020");
+		testMonthlyFreequencySettings("05/03/2019", "05/01/2019", "05/11/2019", null, 2, null, 5, DayOfWeek.THURSDAY,"28/03/2019", "26/09/2019");
+		testMonthlyFreequencySettings("05/03/2019", "13/01/2019", "05/11/2019", null, 3, null, 2, DayOfWeek.THURSDAY,"11/04/2019", "10/10/2019");
 	}
 
 	private void testMonthlyFreequencySettings(String contextDateStr, String startDate, String endDate, Integer occurances, Integer every, Integer monthDate, Integer dayOfWeekInMonth, DayOfWeek dayOfWeek,
