@@ -422,7 +422,7 @@ public class CalendarHelper {
 	}
 
 	/**
-	 * This Method will compute and return the last occurrence of daily repeated
+	 * This Method will compute and return the last occurrence of yearly repeated
 	 * event for given settings
 	 *
 	 * @param startDate
@@ -490,6 +490,29 @@ public class CalendarHelper {
 		return null;
 	}
 
+	/**
+	 * Method will compute and return the next occurrence of monthly repeated event
+	 * on or just after the contextDate. If next occurrence event not found in range
+	 * of startDate and endDate then return null.
+	 *
+	 * @param contextDate
+	 * 			date after which next event occurrence to find
+	 * @param startDate
+	 * 			the start date of event
+	 * @param endDate
+	 * 			the end date of event - it should be null if occurance value is given
+	 * @param every
+	 * 			event repeat for given every month
+	 * @param occurance
+	 * 			number of occurance of event repeatation - it should be null if endDate is given
+	 * @param monthDate
+	 * 			date of month to event occur on - it should be null if dayOfWeekInMonth is given
+	 * @param dayOfWeekInMonth
+	 * 			week day of month in range [1-4] or last week day as value 5
+	 * @param dayOfWeek
+	 * 			week day name [SUN, MON, .., SAT]
+	 * @return the next occurrence date
+	 */
 	public static LocalDate getMonthlyNextOccuranceDate(LocalDate contextDate, LocalDate startDate, LocalDate endDate, Integer every, Integer occurance, Integer monthDate, Integer dayOfWeekInMonth, DayOfWeek dayOfWeek) {
 
 		boolean withEndDate = false;
@@ -572,6 +595,26 @@ public class CalendarHelper {
 		return null;
 	}
 
+	/**
+	 * This Method will compute and return the last occurrence of monthly repeated
+	 * event for given settings
+	 *
+	 * @param startDate
+	 * 			the start date of event
+	 * @param endDate
+	 * 			the end date of event - it should be null if occurance value is given
+	 * @param every
+	 * 			event repeat for given every month
+	 * @param occurance
+	 * 			number of occurance of event repeatation - it should be null if endDate is given
+	 * @param monthDate
+	 * 			date of month to event occur on - it should be null if dayOfWeekInMonth is given
+	 * @param dayOfWeekInMonth
+	 * 			week day of month in range [1-4] or last week day as value 5
+	 * @param dayOfWeek
+	 * 			week day name [SUN, MON, .., SAT]
+	 * @return the last occurrence date
+	 */
 	public static LocalDate getMonthlyLastOccuranceDate(LocalDate startDate, LocalDate endDate, Integer every, Integer occurance, Integer monthDate, Integer dayOfWeekInMonth, DayOfWeek dayOfWeek) {
 		boolean withEndDate = false;
 		boolean isNeverEnds = false;
