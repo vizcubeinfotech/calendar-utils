@@ -79,6 +79,30 @@ public class CalendarHelperTest {
 		assertDate(expectedLastDate, actualLastOcuucranceDate);
 	}
 
+	@Test
+	public void testMonthlyFreequencySettings() {
+		testMonthlyFreequencySettings("05/01/2019", "05/01/2019", "05/09/2019", null, 2, 21, null, null,"21/01/2019", "21/07/2019");
+		testMonthlyFreequencySettings("05/01/2019", "05/01/2019", "22/09/2019", null, 2, 21, null, null,"21/01/2019", "21/09/2019");
+		testMonthlyFreequencySettings("05/04/2019", "05/01/2019", "05/10/2019", null, 1, 31, null, null,"31/05/2019", "31/08/2019");
+		testMonthlyFreequencySettings("05/03/2019", "05/01/2019", null, 9, 2, 3, null, null,"03/05/2019", "03/07/2020");
+		testMonthlyFreequencySettings("05/03/2019", "05/01/2019", null, 9, 2, null, 3, DayOfWeek.THURSDAY,"21/03/2019", "21/05/2020");
+		testMonthlyFreequencySettings("05/03/2019", "05/01/2019", null, 9, 2, null, 5, DayOfWeek.THURSDAY,"28/03/2019", "28/05/2020");
+		testMonthlyFreequencySettings("05/03/2019", "05/01/2019", "05/11/2019", null, 2, null, 5, DayOfWeek.THURSDAY,"28/03/2019", "26/09/2019");
+		testMonthlyFreequencySettings("05/03/2019", "13/01/2019", "05/11/2019", null, 3, null, 2, DayOfWeek.THURSDAY,"11/04/2019", "10/10/2019");
+	}
+
+	private void testMonthlyFreequencySettings(String contextDateStr, String startDate, String endDate, Integer occurances, Integer every, Integer monthDate, Integer dayOfWeekInMonth, DayOfWeek dayOfWeek,
+											  String expectedNextDate, String expectedLastDate) {
+
+		/** when */
+		LocalDate actualNextOcuucranceDate = CalendarHelper.getMonthlyNextOccuranceDate(getDate(contextDateStr), getDate(startDate), endDate == null ? null : getDate(endDate), every, occurances, monthDate,dayOfWeekInMonth, dayOfWeek);
+		LocalDate actualLastOcuucranceDate = CalendarHelper.getMonthlyLastOccuranceDate(getDate(startDate), endDate == null ? null : getDate(endDate), every, occurances, monthDate, dayOfWeekInMonth, dayOfWeek);
+
+		/** then */
+		assertDate(expectedNextDate, actualNextOcuucranceDate);
+		assertDate(expectedLastDate, actualLastOcuucranceDate);
+	}
+
 	private LocalDate getDate(String ddMMYYYYWithSlash) {
 		return LocalDate.parse(ddMMYYYYWithSlash, DateTimeFormatter.ofPattern(DateHelper.DATE_FORMAT_DD_MM_YYYY_WITH_SLASH));
 	}

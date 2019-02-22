@@ -1,10 +1,12 @@
 package com.vizcube.util;
 
+import java.time.DateTimeException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Year;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
 public class CalendarHelper {
@@ -420,7 +422,7 @@ public class CalendarHelper {
 	}
 
 	/**
-	 * This Method will compute and return the last occurrence of daily repeated
+	 * This Method will compute and return the last occurrence of yearly repeated
 	 * event for given settings
 	 *
 	 * @param startDate
@@ -486,6 +488,249 @@ public class CalendarHelper {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Method will compute and return the next occurrence of monthly repeated event
+	 * on or just after the contextDate. If next occurrence event not found in range
+	 * of startDate and endDate then return null.
+	 *
+	 * @param contextDate
+	 * 			date after which next event occurrence to find
+	 * @param startDate
+	 * 			the start date of event
+	 * @param endDate
+	 * 			the end date of event - it should be null if occurance value is given
+	 * @param every
+	 * 			event repeat for given every month
+	 * @param occurance
+	 * 			number of occurance of event repeatation - it should be null if endDate is given
+	 * @param monthDate
+	 * 			date of month to event occur on - it should be null if dayOfWeekInMonth is given
+	 * @param dayOfWeekInMonth
+	 * 			week day of month in range [1-4] or last week day as value 5
+	 * @param dayOfWeek
+	 * 			week day name [SUN, MON, .., SAT]
+	 * @return the next occurrence date
+	 */
+	public static LocalDate getMonthlyNextOccuranceDate(LocalDate contextDate, LocalDate startDate, LocalDate endDate, Integer every, Integer occurance, Integer monthDate, Integer dayOfWeekInMonth, DayOfWeek dayOfWeek) {
+
+		boolean withEndDate = false;
+		boolean isNeverEnds = false;
+		boolean endsByOccurrence = false;
+		if (null == endDate) {
+			if (null == occurance) {
+				throw new IllegalArgumentException("Select valid event ending scenario.");
+			}
+			isNeverEnds = occurance == -1;
+			endsByOccurrence = occurance != -1;
+		} else if (null != occurance) {
+			throw new IllegalArgumentException("Select valid event ending scenario.");
+		} else {
+			withEndDate = true;
+		}
+
+		boolean repeatMonthDate = false;
+		boolean repeatDayOfWeekInMonth = false;
+
+		boolean isLastDayOfWeek = false;
+
+		if (monthDate != null) {
+			if (dayOfWeekInMonth != null) {
+				throw new IllegalArgumentException("Select any one of week day or date in month.");
+			} else {
+				repeatMonthDate = true;
+			}
+		} else if(dayOfWeekInMonth != null) {
+			if (dayOfWeekInMonth < 1 || dayOfWeekInMonth > 5) {
+				throw new IllegalArgumentException("Select valid day of week in month between 1 to 5.");
+			}
+			repeatDayOfWeekInMonth = true;
+			isLastDayOfWeek = dayOfWeekInMonth == 5;
+		} else {
+			throw new IllegalArgumentException("Select valid week day or date in month.");
+		}
+
+		LocalDate actualStartDate = null;
+		if (repeatMonthDate) {
+			if (monthDate > 31 && monthDate < 1) {
+				throw new IllegalArgumentException("Provide valid date of month!");
+			}
+			if (startDate.getDayOfMonth() > monthDate) {
+				actualStartDate = getNextDateOfNextEventMonth(startDate, every, monthDate);
+			} else {
+				try {
+					actualStartDate = startDate.withDayOfMonth(monthDate);
+				} catch (DateTimeException ex) {
+					actualStartDate = getNextDateOfNextEventMonth(startDate, every, monthDate);
+				}
+			}
+		} else if (repeatDayOfWeekInMonth) {//last week day logic remain
+			actualStartDate = startDate.with( isLastDayOfWeek ? TemporalAdjusters.lastInMonth(dayOfWeek) : TemporalAdjusters.dayOfWeekInMonth(dayOfWeekInMonth, dayOfWeek));
+			if (actualStartDate.isBefore(startDate)) {
+				actualStartDate = actualStartDate.withDayOfMonth(1).plusMonths(every).with(isLastDayOfWeek ? TemporalAdjusters.lastInMonth(dayOfWeek) : TemporalAdjusters.dayOfWeekInMonth(dayOfWeekInMonth, dayOfWeek));
+			}
+		}
+
+		if (contextDate.isBefore(actualStartDate) || contextDate.isEqual(actualStartDate)) {
+			return actualStartDate;
+		}
+
+		int skipMonth = (int)actualStartDate.until(contextDate, ChronoUnit.MONTHS);
+		int skipMonthFactor = skipMonth / every;
+        int remaningOccurrence = 0;
+        if (endsByOccurrence) {
+            remaningOccurrence = occurance - every * skipMonthFactor;
+        }
+		LocalDate nextLocalDate = actualStartDate.withDayOfMonth(1).plusMonths(every*skipMonthFactor);
+		nextLocalDate = repeatMonthDate ? getNextDateOfNextEventMonth(nextLocalDate.minusMonths(every), every, monthDate) : nextLocalDate.with(isLastDayOfWeek ? TemporalAdjusters.lastInMonth(dayOfWeek) : TemporalAdjusters.dayOfWeekInMonth(dayOfWeekInMonth, dayOfWeek));
+		while(isNeverEnds || (endsByOccurrence && occurance>0) || (withEndDate && (nextLocalDate.isBefore(endDate) || nextLocalDate.isEqual(endDate)))) {
+			if (contextDate.isBefore(nextLocalDate) || contextDate.isEqual(nextLocalDate)) {
+				return nextLocalDate;
+			} else if (endsByOccurrence) {
+				occurance--;
+			}
+			nextLocalDate = repeatMonthDate ? getNextDateOfNextEventMonth(nextLocalDate, every, monthDate): nextLocalDate.withDayOfMonth(1).plusMonths(every).with(isLastDayOfWeek ? TemporalAdjusters.lastInMonth(dayOfWeek) : TemporalAdjusters.dayOfWeekInMonth(dayOfWeekInMonth,dayOfWeek));
+		}
+		return null;
+	}
+
+	/**
+	 * This Method will compute and return the last occurrence of monthly repeated
+	 * event for given settings
+	 *
+	 * @param startDate
+	 * 			the start date of event
+	 * @param endDate
+	 * 			the end date of event - it should be null if occurance value is given
+	 * @param every
+	 * 			event repeat for given every month
+	 * @param occurance
+	 * 			number of occurance of event repeatation - it should be null if endDate is given
+	 * @param monthDate
+	 * 			date of month to event occur on - it should be null if dayOfWeekInMonth is given
+	 * @param dayOfWeekInMonth
+	 * 			week day of month in range [1-4] or last week day as value 5
+	 * @param dayOfWeek
+	 * 			week day name [SUN, MON, .., SAT]
+	 * @return the last occurrence date
+	 */
+	public static LocalDate getMonthlyLastOccuranceDate(LocalDate startDate, LocalDate endDate, Integer every, Integer occurance, Integer monthDate, Integer dayOfWeekInMonth, DayOfWeek dayOfWeek) {
+		boolean withEndDate = false;
+		boolean isNeverEnds = false;
+		boolean endsByOccurrence = false;
+		if (null == endDate) {
+			if (null == occurance) {
+				throw new IllegalArgumentException("Select valid event ending scenario.");
+			}
+			isNeverEnds = occurance == -1;
+			endsByOccurrence = occurance != -1;
+			if (isNeverEnds) {
+				return null;
+			}
+		} else if (null != occurance) {
+			throw new IllegalArgumentException("Select valid event ending scenario.");
+		} else {
+			withEndDate = true;
+		}
+
+		boolean repeatMonthDate = false;
+		boolean repeatDayOfWeekInMonth = false;
+		boolean isLastDayOfWeek = false;
+		if (monthDate != null) {
+			if (dayOfWeekInMonth != null) {
+				throw new IllegalArgumentException("Select any one of week day or date in month.");
+			} else {
+				repeatMonthDate = true;
+			}
+		} else if(dayOfWeekInMonth != null) {
+			if (dayOfWeekInMonth < 1 || dayOfWeekInMonth > 5) {
+				throw new IllegalArgumentException("Select valid day of week in month between 1 to 5.");
+			}
+
+			isLastDayOfWeek = dayOfWeekInMonth == 5;
+			repeatDayOfWeekInMonth = true;
+		} else {
+			throw new IllegalArgumentException("Select valid week day or date in month.");
+		}
+
+		LocalDate actualStartDate = null;
+		if (repeatMonthDate) {
+			if (monthDate > 31 && monthDate < 1) {
+				throw new IllegalArgumentException("Provide valid date of month!");
+			}
+			if (startDate.getDayOfMonth() > monthDate) {
+				actualStartDate = getNextDateOfNextEventMonth(startDate, every, monthDate);
+			} else {
+				try {
+					actualStartDate = startDate.withDayOfMonth(monthDate);
+				} catch (DateTimeException ex) {
+					actualStartDate = getNextDateOfNextEventMonth(startDate, every, monthDate);
+				}
+			}
+		} else if (repeatDayOfWeekInMonth) {//last week day logic remain
+			actualStartDate = startDate.with(isLastDayOfWeek ? TemporalAdjusters.lastInMonth(dayOfWeek) : TemporalAdjusters.dayOfWeekInMonth(dayOfWeekInMonth, dayOfWeek));
+			if (actualStartDate.isBefore(startDate)) {
+				actualStartDate = actualStartDate.withDayOfMonth(1).plusMonths(every).with(isLastDayOfWeek ? TemporalAdjusters.lastInMonth(dayOfWeek) : TemporalAdjusters.dayOfWeekInMonth(dayOfWeekInMonth, dayOfWeek));
+			}
+		}
+
+		LocalDate nextDate = null;
+		if (withEndDate) {
+			int skipMonth = (int)actualStartDate.until(endDate, ChronoUnit.MONTHS);
+			int skipMonthFactor = skipMonth / every;
+			nextDate = actualStartDate.plusMonths(skipMonthFactor * every);
+
+			if (repeatDayOfWeekInMonth) {
+				nextDate = nextDate.withDayOfMonth(1).with(isLastDayOfWeek ? TemporalAdjusters.lastInMonth(dayOfWeek) : TemporalAdjusters.dayOfWeekInMonth(dayOfWeekInMonth, dayOfWeek));
+				if (nextDate.until(endDate, ChronoUnit.DAYS) < 0) {
+					return nextDate.minusMonths(every).withDayOfMonth(1).with(isLastDayOfWeek ? TemporalAdjusters.lastInMonth(dayOfWeek) : TemporalAdjusters.dayOfWeekInMonth(dayOfWeekInMonth, dayOfWeek));
+				} else
+					return nextDate;
+			} else if (repeatMonthDate) {
+				nextDate = getNextDateOfNextEventMonth(nextDate.minusMonths(every), every, monthDate);
+				if (nextDate.until(endDate,ChronoUnit.DAYS) < 0) {
+					while (actualStartDate.isBefore(nextDate) || actualStartDate.isEqual(nextDate)) {
+						try {
+							nextDate = nextDate.minusMonths(every);
+							nextDate = nextDate.withDayOfMonth(monthDate);
+							if (nextDate.until(endDate,ChronoUnit.DAYS) < 0) {
+								continue;
+							}
+							return nextDate;
+						} catch (DateTimeException ex) {
+						}
+					}
+				} else  {
+					return nextDate;
+				}
+			}
+
+		} else if (endsByOccurrence) {
+			if (repeatDayOfWeekInMonth) {
+				nextDate = actualStartDate.withDayOfMonth(1).plusMonths((occurance - 1) * every).with(isLastDayOfWeek ? TemporalAdjusters.lastInMonth(dayOfWeek) : TemporalAdjusters.dayOfWeekInMonth(dayOfWeekInMonth, dayOfWeek));
+			} else if (repeatMonthDate) {
+				nextDate = actualStartDate;
+				occurance--;
+				while (occurance > 0) {
+					nextDate = getNextDateOfNextEventMonth(nextDate,every,monthDate);
+					occurance--;
+				}
+			}
+			return nextDate;
+		}
+		return null;
+	}
+
+	private static LocalDate getNextDateOfNextEventMonth(LocalDate currentDate, int every, int monthDate) {
+		LocalDate nextDate = currentDate;
+		try {
+			nextDate = currentDate.plusMonths(every);
+			nextDate = nextDate.withDayOfMonth(monthDate);
+			return nextDate;
+		} catch (DateTimeException ex) {
+			return getNextDateOfNextEventMonth(nextDate, every, monthDate);
+		}
 	}
 
 	private static void validateInput(LocalDate startDate, List<DayOfWeek> weekdays, Integer every) {
